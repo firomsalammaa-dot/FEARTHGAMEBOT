@@ -1061,6 +1061,7 @@ body.bingo-live-game-active #gamePage .played-card .cell{
 <button id="settingsExitBtn" type="button">🚪 Exit</button><div id="settingsLanguageContent" hidden><h2 id="languagesPageHeading">🌐 Languages</h2><div class="settings-language-row"><div class="container language-bar" style="padding:8px;margin:8px auto"><select id="languageSelect" aria-label="Choose language" hidden><option value="en">English</option><option value="om">Afaan Oromoo</option><option value="am">አማርኛ (Amharic)</option><option value="so">Somali</option><option value="ti">ትግርኛ (Tigrinya)</option></select><div id="languageRadioList" class="language-radio-list" role="radiogroup" aria-label="Choose language"><label class="language-radio-option"><input type="radio" name="appLanguage" value="en"><span>English</span></label><label class="language-radio-option"><input type="radio" name="appLanguage" value="om"><span>Afaan Oromoo</span></label><label class="language-radio-option"><input type="radio" name="appLanguage" value="am"><span>አማርኛ (Amharic)</span></label><label class="language-radio-option"><input type="radio" name="appLanguage" value="so"><span>Somali</span></label><label class="language-radio-option"><input type="radio" name="appLanguage" value="ti"><span>ትግርኛ (Tigrinya)</span></label></div></div></div></div></div>
 <div id="settingsProfileContent" hidden>
 <h1 id="profileSubpageHeading">👤 PROFILE</h1>
+<button id="openLocalDemoAdminBtn" type="button">🛠️ Local Demo Admin · Demo Points</button>
 <div class="panel"><h2 id="profileAuthTitle">Register / Login</h2>
 <div class="auth-mode"><button id="showRegisterBtn" type="button">📝 Register</button><button id="showLoginBtn" class="secondary" type="button">🔐 Login</button></div>
 <div id="registerFields">
@@ -6415,6 +6416,148 @@ html body:has(#selectionPage:not([hidden])) #taskbar #gameMenuBtn {
   else applyKookeetDemoMode();
   // Re-apply after page changes in this single-page app.
   document.addEventListener('click',function(){setTimeout(applyKookeetDemoMode,0);},true);
+})();
+</script>
+
+
+<!-- Local Demo Admin Dashboard: Demo Points only; browser-local prototype, not secure admin authentication. -->
+<style id="local-demo-admin-styles">
+#openLocalDemoAdminBtn{display:block;width:100%;margin:14px 0 8px;padding:13px 16px;border:1px solid #64748b;border-radius:12px;background:#172554;color:#fff;font-weight:800;font-size:15px;cursor:pointer}
+#localDemoAdminDashboard[hidden]{display:none!important}
+#localDemoAdminDashboard{position:fixed;inset:0;z-index:2147483000;overflow:auto;background:#f1f5f9;color:#0f172a;padding:18px 12px calc(28px + env(safe-area-inset-bottom));}
+#localDemoAdminDashboard .demo-admin-wrap{max-width:900px;margin:0 auto}
+#localDemoAdminDashboard .demo-admin-panel{background:#fff;border:1px solid #cbd5e1;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 5px 18px rgba(15,23,42,.07)}
+#localDemoAdminDashboard h2,#localDemoAdminDashboard h3{margin:5px 0 12px}
+#localDemoAdminDashboard .demo-admin-note{background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5}
+#localDemoAdminDashboard label{display:block;font-weight:700;margin:10px 0 5px}
+#localDemoAdminDashboard input,#localDemoAdminDashboard select{width:100%;box-sizing:border-box;padding:11px;border:1px solid #94a3b8;border-radius:9px;background:#fff;color:#0f172a;font-size:15px}
+#localDemoAdminDashboard button{padding:11px 14px;border:0;border-radius:9px;font-weight:800;cursor:pointer}
+#localDemoAdminDashboard .demo-admin-close{background:#334155;color:#fff}
+#localDemoAdminDashboard .demo-admin-add{background:#166534;color:#fff;flex:1}
+#localDemoAdminDashboard .demo-admin-sub{background:#9f1239;color:#fff;flex:1}
+#localDemoAdminDashboard .demo-admin-actions{display:flex;gap:9px;margin-top:12px}
+#localDemoAdminDashboard .demo-admin-table-wrap{overflow-x:auto}
+#localDemoAdminDashboard table{width:100%;border-collapse:collapse;font-size:13px}
+#localDemoAdminDashboard th,#localDemoAdminDashboard td{padding:9px 7px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}
+#localDemoAdminDashboard th{background:#f8fafc}
+#localDemoAdminDashboard .demo-admin-muted{color:#475569;font-size:13px}
+#localDemoAdminDashboard .demo-admin-status{min-height:22px;margin-top:10px;font-weight:700}
+@media(min-width:650px){#localDemoAdminDashboard{padding:28px}#localDemoAdminDashboard .demo-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+</style>
+<section id="localDemoAdminDashboard" hidden aria-label="Local Demo Admin Dashboard">
+ <div class="demo-admin-wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+   <h2>🛠️ Demo Points Dashboard</h2>
+   <button type="button" class="demo-admin-close" id="closeLocalDemoAdminBtn">Close ✕</button>
+  </div>
+  <p class="demo-admin-note"><strong>Local demo only:</strong> this dashboard reads accounts saved in this browser and changes Demo Points only. It is not protected by secure admin authentication, is not shared across devices, and must not be used for real money or private account management.</p>
+  <div class="demo-admin-grid">
+   <div class="demo-admin-panel">
+    <h3>Adjust Demo Points</h3>
+    <label for="demoAdminAccount">Registered account</label>
+    <select id="demoAdminAccount"><option value="">Loading accounts…</option></select>
+    <label for="demoAdminAmount">Amount of Demo Points</label>
+    <input id="demoAdminAmount" type="number" min="0.01" max="1000000" step="0.01" placeholder="Enter points">
+    <div class="demo-admin-actions">
+     <button type="button" class="demo-admin-add" id="demoAdminAddBtn">＋ Add</button>
+     <button type="button" class="demo-admin-sub" id="demoAdminSubtractBtn">− Subtract</button>
+    </div>
+    <div id="demoAdminStatus" class="demo-admin-status" role="status" aria-live="polite"></div>
+   </div>
+   <div class="demo-admin-panel">
+    <h3>Account Summary</h3>
+    <p class="demo-admin-muted">Registered accounts and their Demo Points stored in this browser.</p>
+    <div id="demoAdminSummary"></div>
+   </div>
+  </div>
+  <div class="demo-admin-panel">
+   <h3>Registered Accounts</h3>
+   <div class="demo-admin-table-wrap"><table><thead><tr><th>Name</th><th>Account</th><th>Demo Points</th></tr></thead><tbody id="demoAdminUsersBody"></tbody></table></div>
+  </div>
+  <div class="demo-admin-panel">
+   <h3>Demo Points Change History</h3>
+   <div class="demo-admin-table-wrap"><table><thead><tr><th>Date</th><th>Account</th><th>Change</th><th>New total</th></tr></thead><tbody id="demoAdminHistoryBody"></tbody></table></div>
+   <p class="demo-admin-muted">History is saved locally in this browser.</p>
+  </div>
+ </div>
+</section>
+<script id="local-demo-admin-logic">
+(function(){
+ 'use strict';
+ const $id=id=>document.getElementById(id);
+ const HISTORY_KEY='earthGameLocalDemoAdminHistoryV1';
+ const dashboard=$id('localDemoAdminDashboard');
+ const openBtn=$id('openLocalDemoAdminBtn');
+ const closeBtn=$id('closeLocalDemoAdminBtn');
+ if(!dashboard||!openBtn||!closeBtn||openBtn.dataset.bound==='1')return;
+ openBtn.dataset.bound='1';
+ function getUsers(){try{return typeof readUsers==='function'?readUsers():{};}catch(e){return {};}}
+ function accountKey(value){return String(value||'').trim().toLowerCase();}
+ function getPoints(account){
+  const key=accountKey(account);
+  try{
+   const raw=localStorage.getItem(BALANCE_PREFIX+key);
+   const amount=raw===null?0:Number(raw);
+   return Number.isFinite(amount)&&amount>=0?Number(amount.toFixed(2)):0;
+  }catch(e){return 0;}
+ }
+ function getHistory(){try{const rows=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');return Array.isArray(rows)?rows:[];}catch(e){return [];}}
+ function escapeHTML(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+ function render(){
+  const users=getUsers();
+  const entries=Object.entries(users).filter(([key,user])=>user&&typeof user==='object'&&accountKey(user.account||key));
+  const select=$id('demoAdminAccount'),previous=select.value;
+  select.innerHTML='';
+  if(!entries.length){select.add(new Option('No registered accounts on this browser',''));}
+  entries.sort((a,b)=>String(a[1].name||'').localeCompare(String(b[1].name||''))).forEach(([key,user])=>{
+   const account=accountKey(user.account||key);
+   const option=new Option((user.name||'Player')+' — '+account,account);
+   select.add(option);
+  });
+  if(entries.some(([key,user])=>accountKey(user.account||key)===previous))select.value=previous;
+  $id('demoAdminUsersBody').innerHTML=entries.length?entries.map(([key,user])=>{
+   const account=accountKey(user.account||key);
+   return '<tr><td>'+escapeHTML(user.name||'Player')+'</td><td>'+escapeHTML(account)+'</td><td>'+getPoints(account).toFixed(2)+'</td></tr>';
+  }).join(''):'<tr><td colspan="3">No registered accounts found in this browser.</td></tr>';
+  const total=entries.reduce((sum,[key,user])=>sum+getPoints(user.account||key),0);
+  $id('demoAdminSummary').innerHTML='<strong>Accounts:</strong> '+entries.length+'<br><strong>Total Demo Points:</strong> '+total.toFixed(2);
+  const history=getHistory();
+  $id('demoAdminHistoryBody').innerHTML=history.length?history.slice(0,100).map(row=>'<tr><td>'+escapeHTML(new Date(row.at).toLocaleString())+'</td><td>'+escapeHTML(row.account)+'</td><td>'+escapeHTML(row.change>0?'+':'')+Number(row.change).toFixed(2)+'</td><td>'+Number(row.total).toFixed(2)+'</td></tr>').join(''):'<tr><td colspan="4">No changes recorded yet.</td></tr>';
+ }
+ function changePoints(direction){
+  const account=accountKey($id('demoAdminAccount').value);
+  const amount=Number($id('demoAdminAmount').value);
+  const users=getUsers();
+  const exists=Object.entries(users).some(([key,user])=>accountKey(user&&user.account||key)===account);
+  const status=$id('demoAdminStatus');
+  if(!account||!exists){status.textContent='Select a registered account first.';return;}
+  if(!Number.isFinite(amount)||amount<=0||amount>1000000){status.textContent='Enter a valid amount greater than 0 and no more than 1,000,000.';return;}
+  const before=getPoints(account),change=Number((amount*direction).toFixed(2)),after=Number((before+change).toFixed(2));
+  if(after<0){status.textContent='Not enough Demo Points to subtract.';return;}
+  try{
+   if(typeof persistWalletAmount==='function'){
+    if(!persistWalletAmount(account,after))throw new Error('save failed');
+   }else{
+    localStorage.setItem(BALANCE_PREFIX+account,String(after));
+    try{localStorage.setItem(BALANCE_BACKUP_PREFIX+account,String(after));}catch(e){}
+   }
+   const history=getHistory();
+   history.unshift({at:new Date().toISOString(),account,change,total:after});
+   localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(0,100)));
+   if(typeof accountId==='function'&&accountId()===account&&typeof loadBalance==='function'){
+    loadBalance();if(typeof updateBalance==='function')updateBalance();
+   }
+   $id('demoAdminAmount').value='';
+   status.textContent=(direction>0?'Demo Points added.':'Demo Points subtracted.')+' New total: '+after.toFixed(2);
+   render();
+  }catch(e){status.textContent='Could not save this change in browser storage.';}
+ }
+ openBtn.addEventListener('click',()=>{render();dashboard.hidden=false;document.body.style.overflow='hidden';});
+ closeBtn.addEventListener('click',()=>{dashboard.hidden=true;document.body.style.overflow='';});
+ $id('demoAdminAddBtn').addEventListener('click',()=>changePoints(1));
+ $id('demoAdminSubtractBtn').addEventListener('click',()=>changePoints(-1));
+ dashboard.addEventListener('click',event=>{if(event.target===dashboard){dashboard.hidden=true;document.body.style.overflow='';}});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!dashboard.hidden){dashboard.hidden=true;document.body.style.overflow='';}});
 })();
 </script>
 
